@@ -40,8 +40,13 @@ def process():
             else: result = ciphers.hill_decrypt(text, key)
                 
         elif cipher_type == 'enigma':
-            positions = data.get('key_enigma', 'AAA')
-            result = ciphers.enigma_encrypt_decrypt(text, positions)
+            rotors = (data.get('enigma_r1', 'I'), data.get('enigma_r2', 'II'), data.get('enigma_r3', 'III'))
+            reflector = data.get('enigma_reflector', 'UKW-B')
+            rings = data.get('enigma_rings', 'AAA')
+            pos = data.get('enigma_pos', 'AAA')
+            plugboard = data.get('enigma_plugboard', '')
+            
+            result = ciphers.full_enigma_encrypt_decrypt(text, rotors, reflector, rings, pos, plugboard)
             
         else:
             error = "Invalid cipher type."

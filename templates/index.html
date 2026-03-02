@@ -26,7 +26,7 @@
                     <option value="affine">Affine Cipher</option>
                     <option value="playfair">Playfair Cipher</option>
                     <option value="hill">Hill Cipher</option>
-                    <option value="enigma">Enigma Cipher (M3 Simplified)</option>
+                    <option value="enigma">Enigma Cipher (Full M3)</option>
                 </select>
             </div>
 
@@ -66,10 +66,32 @@
                 </div>
 
                 <div id="key-enigma" class="key-group">
+                    <div class="form-group input-row">
+                        <div class="col">
+                            <label>Reflector</label>
+                            <select id="enigma-reflector" class="glass-input">
+                                <option value="UKW-B">UKW-B</option>
+                                <option value="UKW-C">UKW-C</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>Rotors (L/M/R)</label>
+                            <div style="display:flex;gap:5px;">
+                                <select id="enigma-r1" class="glass-input"><option value="I">I</option><option value="II">II</option><option value="III">III</option><option value="IV">IV</option><option value="V">V</option></select>
+                                <select id="enigma-r2" class="glass-input"><option value="I">I</option><option value="II" selected>II</option><option value="III">III</option><option value="IV">IV</option><option value="V">V</option></select>
+                                <select id="enigma-r3" class="glass-input"><option value="I">I</option><option value="II">II</option><option value="III" selected>III</option><option value="IV">IV</option><option value="V">V</option></select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group input-row enigma-row">
-                        <div class="col"><label>R1</label><input type="text" id="enigma-1" class="glass-input" value="A" maxlength="1"></div>
-                        <div class="col"><label>R2</label><input type="text" id="enigma-2" class="glass-input" value="A" maxlength="1"></div>
-                        <div class="col"><label>R3</label><input type="text" id="enigma-3" class="glass-input" value="A" maxlength="1"></div>
+                        <div class="col"><label>Ring Settings (L/M/R)</label><input type="text" id="enigma-rings" class="glass-input" value="AAA" maxlength="3" placeholder="AAA"></div>
+                        <div class="col"><label>Start Pos (L/M/R)</label><input type="text" id="enigma-pos" class="glass-input" value="AAA" maxlength="3" placeholder="AAA"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Plugboard Pairs <span class="hint">(e.g., AB CD EF)</span></label>
+                        <input type="text" id="enigma-plugboard" class="glass-input" placeholder="Leave empty for none" value="">
                     </div>
                 </div>
             </div>

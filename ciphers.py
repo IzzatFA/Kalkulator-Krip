@@ -152,33 +152,98 @@ def hill_decrypt(text, matrix_str):
         result.extend([ALPHABET[v[0]] for v in decrypted])
     return ''.join(result)
 
-# --- Enigma Cipher ---
+# --- Full Enigma Cipher (M3) ---
 class EnigmaMachine:
-    def __init__(self, r1='A', r2='A', r3='A'):
-        self.rotors = ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 'AJDKSIRUXBLHWTMCQGZNPYFVOE', 'BDFHJLCPRTXVZNYEIWGAKMUSQO']
-        self.reflector = 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
-        self.pos = [ALPHABET.index(r1.upper()), ALPHABET.index(r2.upper()), ALPHABET.index(r3.upper())]
+    # Full wiring for standard M3 Enigma rotors and reflectors
+    WIRINGS = {
+        'I':    'EKMFLGDQVZNTOWYHXUSPAIBRCJ',
+        'II':   'AJDKSIRUXBLHWTMCQGZNPYFVOE',
+        'III':  'BDFHJLCPRTXVZNYEIWGAKMUSQO',
+        'IV':   'ESOVPZJAYQUIRHXLNFTGKDCMWB',
+        'V':    'VZBRGITYUPSDNHLXAWMJQOFECK',
+        'UKW-B': 'YRUHQSLDPXNGOKMIEBFZCWVJAT',
+        'UKW-C': 'FVPJIAOYEDRZXWGCTKUQSBNMHL'
+    }
+    
+    # Notch positions (when these step down, the next rotor turns)
+    NOTCHES = {
+        'I': 'Q', 'II': 'E', 'III': 'V', 'IV': 'J', 'V': 'Z'
+    }
 
-    def step(self):
+    def __init__(self, rotors=('I', 'II', 'III'), reflector='UKW-B', ring_settings='AAA', start_pos='AAA', plugboard=""):
+        self.r_types = rotors
+        self.rotors = [self.WIRINGS[r] for r in rotors]
+        self.reflector = self.WIRINGS[reflector]
+        self.rings = [ALPHABET.index(c.upper()) for c in ring_settings]
+        self.pos = [ALPHABET.index(c.upper()) for c in start_pos]
+        
+        # Setup plugboard
+        self.plugboard = {}
+        if plugboard:
+            pairs = plugboard.upper().split()
+            for pair in pairs:
+                if len(pair) == 2:
+                    self.plugboard[pair[0]] = pair[1]
+                    self.plugboard[pair[1]] = pair[0]
+
+    def _step_rotors(self):
+        # M3 Enigma has a double stepping anomaly on the middle rotor
+        right_notch = ALPHABET.index(self.NOTCHES[self.r_types[2]])
+        middle_notch = ALPHABET.index(self.NOTCHES[self.r_types[1]])
+        
+        step_middle = self.pos[2] == right_notch
+        step_left = self.pos[1] == middle_notch
+        
+        # Right rotor always steps
         self.pos[2] = (self.pos[2] + 1) % 26
-        if self.pos[2] == 0:
+        
+        if step_middle or step_left:
             self.pos[1] = (self.pos[1] + 1) % 26
-            if self.pos[1] == 0: self.pos[0] = (self.pos[0] + 1) % 26
+            if step_left:
+                self.pos[0] = (self.pos[0] + 1) % 26
 
-    def pass_rotor(self, char_idx, r_idx, reverse=False):
+    def _pass_through_plugboard(self, char):
+        return self.plugboard.get(char, char)
+
+    def _pass_rotor(self, char_idx, r_idx, reverse=False):
         p = self.pos[r_idx]
-        if not reverse: return (ALPHABET.index(self.rotors[r_idx][(char_idx + p) % 26]) - p) % 26
-        return (self.rotors[r_idx].index(ALPHABET[(char_idx + p) % 26]) - p) % 26
+        ring = self.rings[r_idx]
+        
+        shift = (p - ring) % 26
+        
+        if not reverse:
+            # Entry idx taking ring setting and pos into account
+            entry_idx = (char_idx + shift) % 26
+            out_char = self.rotors[r_idx][entry_idx]
+            out_idx = ALPHABET.index(out_char)
+            return (out_idx - shift) % 26
+        else:
+            # Backward pass
+            char_to_find = ALPHABET[(char_idx + shift) % 26]
+            idx_in_rotor = self.rotors[r_idx].index(char_to_find)
+            return (idx_in_rotor - shift) % 26
 
     def process(self, char):
-        self.step()
-        idx = ALPHABET.index(char)
-        for i in [2, 1, 0]: idx = self.pass_rotor(idx, i, False)
-        idx = ALPHABET.index(self.reflector[idx])
-        for i in [0, 1, 2]: idx = self.pass_rotor(idx, i, True)
-        return ALPHABET[idx]
+        char = self._pass_through_plugboard(char)
+        char_idx = ALPHABET.index(char)
+        
+        self._step_rotors()
+        
+        # Forward through rotors 3 -> 2 -> 1
+        for i in [2, 1, 0]:
+            char_idx = self._pass_rotor(char_idx, i, reverse=False)
+            
+        # Reflector
+        char_idx = ALPHABET.index(self.reflector[char_idx])
+        
+        # Backward through rotors 1 -> 2 -> 3
+        for i in [0, 1, 2]:
+            char_idx = self._pass_rotor(char_idx, i, reverse=True)
+            
+        out_char = ALPHABET[char_idx]
+        return self._pass_through_plugboard(out_char)
 
-def enigma_encrypt_decrypt(text, settings='AAA'):
-    if not settings or len(settings) != 3: settings = 'AAA'
-    machine = EnigmaMachine(settings[0], settings[1], settings[2])
-    return ''.join([machine.process(c) for c in format_text(text)])
+def full_enigma_encrypt_decrypt(text, rotors, reflector, rings, pos, plugboard):
+    text = format_text(text)
+    machine = EnigmaMachine(rotors, reflector, rings, pos, plugboard)
+    return ''.join([machine.process(c) for c in text])

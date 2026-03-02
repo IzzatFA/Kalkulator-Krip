@@ -2,10 +2,10 @@
     const cipherSelect = document.getElementById("cipher-select");
     const keyGroups = document.querySelectorAll(".key-group");
     
-    // Auto-uppercase Enigma
-    const enigmaInputs = [document.getElementById("enigma-1"), document.getElementById("enigma-2"), document.getElementById("enigma-3")];
+    // Auto-uppercase Enigma config text inputs
+    const enigmaInputs = [document.getElementById("enigma-rings"), document.getElementById("enigma-pos"), document.getElementById("enigma-plugboard")];
     enigmaInputs.forEach(input => {
-        if(input) input.addEventListener("input", function() { this.value = this.value.toUpperCase().replace(/[^A-Z]/g, ''); });
+        if(input) input.addEventListener("input", function() { this.value = this.value.toUpperCase().replace(/[^A-Z ]/g, ''); });
     });
 
     cipherSelect.addEventListener("change", (e) => {
@@ -37,10 +37,17 @@ async function processText(action) {
         else if(cipherType === 'playfair') payload.key_playfair = document.getElementById('playfair-key').value;
         else if(cipherType === 'hill') payload.key_hill = document.getElementById('hill-key').value;
         else if(cipherType === 'enigma') {
-            const r1 = document.getElementById('enigma-1').value || 'A';
-            const r2 = document.getElementById('enigma-2').value || 'A';
-            const r3 = document.getElementById('enigma-3').value || 'A';
-            payload.key_enigma = r1 + r2 + r3;
+            payload.enigma_reflector = document.getElementById('enigma-reflector').value;
+            payload.enigma_r1 = document.getElementById('enigma-r1').value;
+            payload.enigma_r2 = document.getElementById('enigma-r2').value;
+            payload.enigma_r3 = document.getElementById('enigma-r3').value;
+            
+            const rings = document.getElementById('enigma-rings').value || 'AAA';
+            const pos = document.getElementById('enigma-pos').value || 'AAA';
+            
+            payload.enigma_rings = rings.padEnd(3, 'A').substring(0,3);
+            payload.enigma_pos = pos.padEnd(3, 'A').substring(0,3);
+            payload.enigma_plugboard = document.getElementById('enigma-plugboard').value;
         }
 
         const res = await fetch('/api/process', {
