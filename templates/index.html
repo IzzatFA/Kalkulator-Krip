@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoGlass | Web Cipher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <main class="container">
+        <header class="header">
+            <h1>Crypto<span class="highlight">Glass</span></h1>
+            <p>Advanced Cipher Calculator</p>
+        </header>
+
+        <section class="glass-panel">
+            <div class="form-group">
+                <label for="cipher-select">Select Cipher</label>
+                <select id="cipher-select" class="glass-input">
+                    <option value="vigenere">Vigenere Cipher</option>
+                    <option value="affine">Affine Cipher</option>
+                    <option value="playfair">Playfair Cipher</option>
+                    <option value="hill">Hill Cipher</option>
+                    <option value="enigma">Enigma Cipher (M3 Simplified)</option>
+                </select>
+            </div>
+
+            <div class="keys-container">
+                <div id="key-vigenere" class="key-group active">
+                    <div class="form-group">
+                        <label for="vigenere-key">Secret Key</label>
+                        <input type="text" id="vigenere-key" class="glass-input" placeholder="e.g. CRYSTAL" value="CRYSTAL">
+                    </div>
+                </div>
+
+                <div id="key-affine" class="key-group">
+                    <div class="form-group input-row">
+                        <div class="col">
+                            <label for="affine-a">Key A</label>
+                            <input type="number" id="affine-a" class="glass-input" value="5">
+                        </div>
+                        <div class="col">
+                            <label for="affine-b">Key B</label>
+                            <input type="number" id="affine-b" class="glass-input" value="8">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="key-playfair" class="key-group">
+                    <div class="form-group">
+                        <label for="playfair-key">Keyword (No J)</label>
+                        <input type="text" id="playfair-key" class="glass-input" placeholder="e.g. MONARCHY" value="MONARCHY">
+                    </div>
+                </div>
+
+                <div id="key-hill" class="key-group">
+                    <div class="form-group">
+                        <label for="hill-key">Matrix Elements (Space-separated)</label>
+                        <input type="text" id="hill-key" class="glass-input" value="5 8 17 3">
+                    </div>
+                </div>
+
+                <div id="key-enigma" class="key-group">
+                    <div class="form-group input-row enigma-row">
+                        <div class="col"><label>R1</label><input type="text" id="enigma-1" class="glass-input" value="A" maxlength="1"></div>
+                        <div class="col"><label>R2</label><input type="text" id="enigma-2" class="glass-input" value="A" maxlength="1"></div>
+                        <div class="col"><label>R3</label><input type="text" id="enigma-3" class="glass-input" value="A" maxlength="1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="io-container">
+                <div class="form-group">
+                    <label for="input-text">Input Text</label>
+                    <textarea id="input-text" class="glass-input" rows="4" placeholder="Enter text..."></textarea>
+                </div>
+
+                <div class="actions">
+                    <button id="btn-encrypt" class="btn btn-primary" onclick="processText('encrypt')"><span class="btn-text">Encrypt</span></button>
+                    <button id="btn-decrypt" class="btn btn-secondary" onclick="processText('decrypt')"><span class="btn-text">Decrypt</span></button>
+                </div>
+
+                <div class="form-group output-group">
+                    <label for="output-text">Result</label>
+                    <div class="output-wrapper">
+                        <textarea id="output-text" class="glass-input output-area" rows="4" readonly></textarea>
+                    </div>
+                    <div id="error-msg" class="error-message"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
